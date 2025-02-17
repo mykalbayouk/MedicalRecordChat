@@ -1,6 +1,6 @@
 import pdfToText from "react-pdftotext";
 
-export default function extractText(file: any): Promise<string> {
+export default function extractText(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
         if (file) {
             pdfToText(file)

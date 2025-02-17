@@ -2,7 +2,7 @@
 import { useState } from "react";
 import DragAndDropUpload from "../../components/dragDrop";
 import extractText from "../../util/extractText";
-import cleanText from "../../util/cleanString";
+import formatMessage from "../../util/formatMessage";
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 
@@ -11,7 +11,7 @@ interface Message {
     content: string;
 }
 
-let toGPT:string[] = [];
+const toGPT:string[] = [];
 
 export default function Home() {
     const [file, setFile] = useState<File | null>(null);
@@ -20,7 +20,7 @@ export default function Home() {
     
 
 
-    const handleFileChange = (file: any) => {
+    const handleFileChange = (file: File[]) => {
         setFile(file[0]);
     };
 
@@ -68,7 +68,7 @@ export default function Home() {
         }
     }
 
-    const handleUpload = async (event: any) => {
+    const handleUpload = async (event: React.FormEvent) => {
         event.preventDefault();
         setOpen(true);
         if (file === null) {
@@ -76,8 +76,7 @@ export default function Home() {
             return;
         }
         if (file) {
-            let text = await extractText(file);
-            const startIndex = text.indexOf("CLINICAL INFORMATION");
+            const text = await extractText(file);
             const newMessage: Message = {
                 role: "system",
                 content: "Analyzing the document..."
@@ -193,15 +192,5 @@ export default function Home() {
     )
 }
 
-function formatMessage(content: string): string {
-    // Replace markdown-like syntax with HTML tags
-    content = content.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>"); // Bold
-    content = content.replace(/\*(.*?)\*/g, "<em>$1</em>"); // Italic
-    content = content.replace(/__(.*?)__/g, "<u>$1</u>"); // Underline
-    content = content.replace(/~~(.*?)~~/g, "<del>$1</del>"); // Strikethrough
-    content = content.replace(/\n/g, "<br>"); // Newline to <br>
-
-    return content;
-}
 
 
