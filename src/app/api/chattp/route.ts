@@ -8,9 +8,8 @@ export async function POST(request: NextRequest) {
     });
 
     const params = await request.json();
-
     const response = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-4o-mini",
         messages: [
             {
                 role: "system",
@@ -18,11 +17,11 @@ export async function POST(request: NextRequest) {
             },
             {
                 role: "user",
-                content: `Using the file above, answer the users most recent question only ${params.question}`
+                content: `Answer only the user question at the top of the request. ${params.question}`
             }
         ],
         temperature: 0,
-        max_tokens: 5096,
+        max_tokens: 10024,
         frequency_penalty: 0,
         presence_penalty: 0
     });

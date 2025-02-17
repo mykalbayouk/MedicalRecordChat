@@ -11,11 +11,14 @@ interface Message {
     content: string;
 }
 
+let toGPT:string[] = [];
+
 export default function Home() {
     const [file, setFile] = useState<File | null>(null);
     const [open, setOpen] = useState(false);
     const [chat, setChat] = useState<Message[] | null>([]);
-    const [loading, setLoading] = useState(false);
+    
+
 
     const handleFileChange = (file: any) => {
         setFile(file[0]);
@@ -28,12 +31,12 @@ export default function Home() {
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-        setLoading(true);
         const input = document.getElementById("chat-input") as HTMLInputElement;
         if (input) {
+            toGPT.push("USER: " + input.value + '\n');
             const newMessage: Message = {
             role: "user",
-            content: input.value
+            content: input.value + '\n'
             };
             setChat(prevChat => [...(prevChat || []), newMessage]);
             const newMessage2: Message = {
@@ -41,6 +44,7 @@ export default function Home() {
             content: "Answer is being generated..."
             };
             setChat(prevChat => [...(prevChat || []), newMessage2]);
+            const toSend = toGPT.slice().reverse().join('');
             input.value = "";
             try {
             const response = await fetch("/api/chattp", {
@@ -48,20 +52,20 @@ export default function Home() {
                 headers: {
                 'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ question: newMessage.content }),
+                body: JSON.stringify({ question: toSend }),
             });
             const data = await response.json();
             const responseMessage: Message = {
                 role: "system",
-                content: data.choices[0].message.content
+                content: data.choices[0].message.content + '\n'
             };
+            toGPT.push("SYSTEM: " + data.choices[0].message.content + '\n');
             setChat(prevChat => prevChat?.slice(0, -1) || []);
             setChat(prevChat => [...(prevChat || []), responseMessage]);
             } catch (error) {
             console.error("Error calling AI API:", error);
             }
         }
-        setLoading(false);
     }
 
     const handleUpload = async (event: any) => {
@@ -79,12 +83,6 @@ export default function Home() {
                 content: "Analyzing the document..."
             };
             setChat([newMessage]);
-            if (startIndex !== -1) {
-                text = text.substring(startIndex);
-                text = cleanText(text);
-            } else {
-                console.log("Required text not found in the document.");
-            }
             try {
                 const response = await fetch("/api/gpt", {
                     method: "POST",
@@ -96,8 +94,9 @@ export default function Home() {
                 const data = await response.json();
                 const responseMessage: Message = {
                     role: "system",
-                    content: data.choices[0].message.content
+                    content: data.choices[0].message.content + '\n'
                 };
+                toGPT.push("SYSTEM: " + data.choices[0].message.content + '\n');
                 setChat(prevChat => prevChat?.slice(0, -1) || []);
                 setChat([responseMessage]);
             } catch (error) {
