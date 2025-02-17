@@ -36,7 +36,7 @@ const { getRootProps, getInputProps, isDragActive } = useDropzone({
   maxFiles,
   maxSize,
   accept: {
-    'image/*': ['.jpeg', '.jpg', '.png', '.gif', '.tiff'],
+    // 'image/*': ['.jpeg', '.jpg', '.png', '.gif', '.tiff'],
     'application/pdf': ['.pdf'],
   },
 })

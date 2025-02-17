@@ -1,7 +1,8 @@
 'use client';
 import { useState } from "react";
 import DragAndDropUpload from "../../components/dragDrop";
-import pdfToText from 'react-pdftotext'
+import extractText from "../../util/extractText";
+import cleanText from "../../util/cleanString";
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 
@@ -204,30 +205,4 @@ function formatMessage(content: string): string {
     return content;
 }
 
-function extractText(file: any): Promise<string> {
-    return new Promise((resolve, reject) => {
-        if (file) {
-            pdfToText(file)
-                .then((text: string) => resolve(text))
-                .catch((error: Error) => reject("Failed to extract text from pdf: " + error));
-        } else {
-            reject("No file provided");
-        }
-    });
-}
 
-function cleanText(text: string): string {
-    // Remove URLs
-    text = text.replace(/https?:\/\/[^\s]+/g, "");
-
-    // Remove page numbers (assuming they are in the format "Page X" or "Page X of Y")
-    text = text.replace(/Page \d+(\s+of\s+\d+)?/gi, "");
-
-    // Remove phone numbers (assuming they are in the format (123) 456-7890 or 123-456-7890)
-    text = text.replace(/(\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4})/g, "");
-
-    // Remove extra whitespace and newlines
-    text = text.replace(/(\r\n|\n|\r)/gm, " ").replace(/\s+/g, " ").trim();
-
-    return text;
-}
