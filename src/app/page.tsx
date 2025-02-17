@@ -4,8 +4,6 @@ import Link from 'next/link';
 
 const StartPage: React.FC = () => {
 
-    console.log(process.env.NEXT_PUBLIC_OPEN_AI);
-
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-white text-black">
             <h1 className="text-8xl font-bold mb-8">Welcome to The Demo</h1>
