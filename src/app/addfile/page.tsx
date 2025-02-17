@@ -14,6 +14,7 @@ export default function Home() {
     const [file, setFile] = useState<File | null>(null);
     const [open, setOpen] = useState(false);
     const [chat, setChat] = useState<Message[] | null>([]);
+    const [loading, setLoading] = useState(false);
 
     const handleFileChange = (file: any) => {
         setFile(file[0]);
@@ -26,6 +27,7 @@ export default function Home() {
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
+        setLoading(true);
         const input = document.getElementById("chat-input") as HTMLInputElement;
         if (input) {
             const newMessage: Message = {
@@ -33,6 +35,11 @@ export default function Home() {
             content: input.value
             };
             setChat(prevChat => [...(prevChat || []), newMessage]);
+            const newMessage2: Message = {
+            role: "system",
+            content: "Answer is being generated..."
+            };
+            setChat(prevChat => [...(prevChat || []), newMessage2]);
             input.value = "";
             try {
             const response = await fetch("/api/chattp", {
@@ -47,13 +54,13 @@ export default function Home() {
                 role: "system",
                 content: data.choices[0].message.content
             };
+            setChat(prevChat => prevChat?.slice(0, -1) || []);
             setChat(prevChat => [...(prevChat || []), responseMessage]);
             } catch (error) {
             console.error("Error calling AI API:", error);
             }
         }
-        
-
+        setLoading(false);
     }
 
     const handleUpload = async (event: any) => {
@@ -66,7 +73,11 @@ export default function Home() {
         if (file) {
             let text = await extractText(file);
             const startIndex = text.indexOf("CLINICAL INFORMATION");
-
+            const newMessage: Message = {
+                role: "system",
+                content: "Analyzing the document..."
+            };
+            setChat([newMessage]);
             if (startIndex !== -1) {
                 text = text.substring(startIndex);
                 text = cleanText(text);
@@ -86,6 +97,7 @@ export default function Home() {
                     role: "system",
                     content: data.choices[0].message.content
                 };
+                setChat(prevChat => prevChat?.slice(0, -1) || []);
                 setChat([responseMessage]);
             } catch (error) {
                 console.error("Error calling AI API:", error);
@@ -148,6 +160,20 @@ export default function Home() {
                                         <input type="text" id="chat-input" className="w-full p-2 mb-2 border border-gray-300 rounded" placeholder="Type your message..." />
                                         <button type="submit" className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600 mt-2">Send</button>
                                     </form>
+                                    <button
+                                        onClick={() => {
+                                            const element = document.createElement("a");
+                                            const file = new Blob([chat?.map(message => `${message.role}: ${message.content}`).join("\n") || ""], { type: 'text/plain' });
+                                            element.href = URL.createObjectURL(file);
+                                            element.download = "chat_log.txt";
+                                            document.body.appendChild(element);
+                                            element.click();
+                                        }}
+                                        className="w-full p-2 bg-gray-500 text-white rounded hover:bg-green-600 mt-2"
+                                    >
+                                        Download Chat Log
+                                    </button>
+
                                 </Box>
                                 <Box sx={{
                                     width: '50%',
