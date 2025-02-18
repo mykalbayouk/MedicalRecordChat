@@ -70,11 +70,11 @@ export default function Home() {
 
     const handleUpload = async (event: React.FormEvent) => {
         event.preventDefault();
-        setOpen(true);
         if (file === null) {
             window.alert('Please Select a File');
             return;
         }
+        setOpen(true);
         if (file) {
             const text = await extractText(file);
             const newMessage: Message = {
